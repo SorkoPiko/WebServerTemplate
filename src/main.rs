@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use crate::endpoint::ratelimit::IpKeyExtractor;
 use crate::model::config::AppConfig;
 use crate::model::keys::Keys;
@@ -9,12 +10,16 @@ use log::LevelFilter;
 use utoipa::openapi::InfoBuilder;
 use utoipa_actix_web::{scope, AppExt};
 use utoipa_swagger_ui::SwaggerUi;
+use crate::database::postgres::PostgresDatabase;
+use crate::model::database::Database;
 
 pub mod model;
 pub mod endpoint;
+pub mod database;
 
 pub struct AppState {
     pub keys: Keys,
+    pub database: Arc<dyn Database>,
 }
 
 #[utoipa::path(summary = "Index", responses(
@@ -49,8 +54,13 @@ async fn main() -> anyhow::Result<()> {
         .finish()
         .context("Failed to create daily governor config")?;
 
+    let database = Arc::new(PostgresDatabase::new(config.database_url.as_str(), 10).await
+        .context("Failed to connect to Postgres database")?
+    );
+
     let app_state = web::Data::new(AppState {
         keys: Keys::from_master_key(config.master_key.as_str()),
+        database,
     });
 
     HttpServer::new(move || {
