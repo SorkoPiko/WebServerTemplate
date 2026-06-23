@@ -1,0 +1,49 @@
+name: Build
+on:
+  push:
+    tags: [ '*' ]
+  release:
+    types: [ 'created', 'edited' ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Check
+        run: cargo check --target x86_64-unknown-linux-gnu
+
+      - name: Build
+        run: cargo build --target x86_64-unknown-linux-gnu --release
+
+      - name: Run tests
+        run: cargo test --target x86_64-unknown-linux-gnu --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-x86_64-unknown-linux-gnu
+          path: target/x86_64-unknown-linux-gnu/release/webserver-template

@@ -1,0 +1,23 @@
+[package]
+name = "webserver-template"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4.12.1"
+actix-governor = "0.10.0"
+utoipa = { version = "5.4.0", features = ["actix_extras"] }
+chrono = { version = "0.4.43", features = ["serde"] }
+utoipa-actix-web = "0.1.2"
+utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
+futures-util = "0.3.32"
+serde = { version = "1.0.228", features = ["derive"] }
+dotenvy = "0.15.7"
+log = "0.4.29"
+fern = "0.7.1"
+jsonwebtoken = { version = "10.3.0", features = ["rust_crypto"] }
+hkdf = "0.13.0"
+sha2 = "0.11.0"
+hex = "0.4.3"
+anyhow = "1.0.102"
+serde_json = "1.0.150"
